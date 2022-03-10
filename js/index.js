@@ -4,12 +4,14 @@ const optionListOrder = document.querySelector('.option__list_order');
 const optionBtnPeriod = document.querySelector('.option__btn_period');
 const optionListPeriod = document.querySelector('.option__list_period');
 
-optionBtnOrder.addEventListener('click', () => { // Кнопка "По дате"
+// Кнопка "По дате"
+optionBtnOrder.addEventListener('click', () => {
   optionListOrder.classList.toggle('option__list_active');
   optionListPeriod.classList.remove('option__list_active');
 });
 
-optionBtnPeriod.addEventListener('click', () => { // Кнопка "За всё время"
+// Кнопка "За всё время"
+optionBtnPeriod.addEventListener('click', () => {
   optionListPeriod.classList.toggle('option__list_active');
   optionListOrder.classList.remove('option__list_active');
 });
@@ -89,3 +91,89 @@ overlayVacancy.addEventListener('click', (e) => {
     overlayVacancy.classList.remove('overlay_active');
   }
 });
+
+// Вывод карточек
+const createCard = (vacancy) => {
+  //Деструктуризация
+  const {
+    title,
+    id,
+    compensation,
+    workSchedule,
+    employer,
+    address,
+    description,
+    date
+  } = vacancy;
+  const card = document.createElement('li');
+  card.classList.add('result__item');
+
+  card.insertAdjacentHTML('afterbegin', `
+    <article class="vacancy">
+      <h2 class="vacancy__title">
+        <a class="vacancy__open-modal" href="#" data-vacancy="${id}">${title}</a>
+      </h2>
+      <p class="vacancy__compensation">${compensation}</p>
+      <p class="vacancy__work-schedule">${workSchedule}</p>
+      <div class="vacancy__employer">
+        <p class="vacancy__employer-title">${employer}</p>
+        <p class="vacancy__employer-address">${address}</p>
+      </div>
+      <p class="vacancy__description">${description}</p>
+      <p class="vacancy__date">
+        <time datetime="${date.split("/").reverse().join("-")}">${date.split("/").join(".")}</time>
+      </p>
+      <div class="vacancy__wrapper-btn">
+        <a class="vacancy__response vacancy__open-modal" href="#" data-vacancy="${id}">Откликнуться</a>
+        <button class="vacancy__contacts">Показать контакты</button>
+      </div>
+    </article>
+  `);
+  return card;
+};
+
+// Карточки выводятся на страницу на каждой итерации цикла по одной
+// const renderCards = (data) => {
+//   resultList.textContent = '';
+//   for (let i = 0; i < data.length; i += 1) {
+//     resultList.append(createCard(data[i]))
+//   }
+// };
+
+// Карточки выводятся на страницу все сразу, после перебора всего массива
+const renderCards = (data) => {
+  resultList.textContent = '';
+  const cards = data.map(createCard);
+  resultList.append(...cards);
+};
+
+
+const getData = ({ search } = {}) => {
+  if (search) {
+    return fetch(`http://localhost:3000/api/vacancy?search=${search}`).then(response => response.json());
+  }
+  return fetch('http://localhost:3000/api/vacancy').then(response => response.json());
+};
+
+const formSearch = document.querySelector('.bottom__search');
+formSearch.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const textSearch = formSearch.search.value; // .search. - атрибут name инпута
+  if (textSearch.length > 2) {
+    formSearch.search.style.borderColor = '';
+    const data = await getData({ search: textSearch });
+    console.log('data: ', data.length);
+    renderCards(data);
+    formSearch.reset();
+  } else {
+    formSearch.search.style.borderColor = 'red';
+    setTimeout(() => { formSearch.search.style.borderColor = '' }, 2000);
+  }
+});
+
+const init = async () => {
+  const data = await getData();
+  console.log('data: ', data);
+  renderCards(data);
+};
+init();
