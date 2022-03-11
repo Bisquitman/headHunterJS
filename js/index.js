@@ -19,9 +19,9 @@ const formSearch = document.querySelector('.bottom__search');
 
 const getData = ({ search, id } = {}) => {
   if (search) {
-    return fetch(`http://localhost:3000/api/vacancy?search=${search}`).then(response => response.json());
+    return fetch(`https://hidden-tor-24992.herokuapp.com/api/vacancy?search=${search}`).then(response => response.json());
   }
-  return fetch(`http://localhost:3000/api/vacancy/${id ? id : ''}`).then(response => response.json());
+  return fetch(`https://hidden-tor-24992.herokuapp.com/api/vacancy/${id ? id : ''}`).then(response => response.json());
 };
 
 
